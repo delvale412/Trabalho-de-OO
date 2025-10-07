@@ -16,16 +16,16 @@ clock = pygame.time.Clock()
 font = pygame.font.SysFont("Arial", 24, bold=True)
 
 # Cores
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-YELLOW = (255, 255, 0)
-RED = (255, 0, 0)
-PINK = (255, 184, 222)
-CYAN = (0, 255, 255)
-ORANGE = (255, 165, 0)
-BLUE_GHOST = (33, 33, 255)
-MAZE_BLUE = (0, 0, 255)
-GHOST_DOOR_COLOR = (255, 184, 222)
+PRETO = (0, 0, 0)
+BRANCO = (255, 255, 255)
+AMARELO = (255, 255, 0)
+VERMELHO = (255, 0, 0)
+ROSA = (255, 184, 222)
+CIANO = (0, 255, 255)
+LARANJA = (255, 165, 0)
+FANTASMA_AZUL = (33, 33, 255)
+MAZE_AZUL = (0, 0, 255)
+COR_PORTA_FANTASMA = (255, 184, 222)
 
 # Layout do Labirinto
 maze_layout = [
@@ -63,9 +63,9 @@ maze_layout = [
 ]
 
 maze = [[int(c) for c in row] for row in maze_layout]
-SCATTER_TARGETS = {"RED": (COLS - 2, 1), "PINK": (1, 1), "CYAN": (COLS - 2, ROWS - 3)}
+SCATTER_TARGETS = {"VERMELHO": (COLS - 2, 1), "ROSA": (1, 1), "CIANO": (COLS - 2, ROWS - 3)}
 
-# --- Classes ---
+# Classes
 class Player:
     def __init__(self, x, y):
         self.x, self.y = x, y
@@ -99,7 +99,7 @@ class Player:
         elif self.dx < 0: start, end = math.pi + mouth, math.pi - mouth
         elif self.dy < 0: start, end = 1.5*math.pi + mouth, 1.5*math.pi - mouth
         else: start, end = 0.5*math.pi + mouth, 0.5*math.pi - mouth
-        pygame.draw.arc(screen, YELLOW, (center[0]-radius, center[1]-radius, radius*2, radius*2), start, end, radius)
+        pygame.draw.arc(screen, AMARELO, (center[0]-radius, center[1]-radius, radius*2, radius*2), start, end, radius)
 
 class Ghost:
     def __init__(self, x, y, color, name):
@@ -166,28 +166,28 @@ class Ghost:
         center = (int(self.x*CELL_SIZE + CELL_SIZE/2), int(self.y*CELL_SIZE + CELL_SIZE/2))
         radius = int(CELL_SIZE/2) - 2
         if self.mode == 'vulnerable':
-            color = BLUE_GHOST if (pygame.time.get_ticks() // 200) % 2 == 0 else WHITE
+            color = FANTASMA_AZUL if (pygame.time.get_ticks() // 200) % 2 == 0 else BRANCO
         else:
             color = self.color
 
         # Desenho de caveira simples
         pygame.draw.circle(screen, color, center, radius)
         eye_offset = radius // 2
-        pygame.draw.circle(screen, BLACK, (center[0]-eye_offset//2, center[1]-eye_offset//2), 2)
-        pygame.draw.circle(screen, BLACK, (center[0]+eye_offset//2, center[1]-eye_offset//2), 2)
-        pygame.draw.line(screen, BLACK, (center[0]-eye_offset//2, center[1]+eye_offset//2),
+        pygame.draw.circle(screen, PRETO, (center[0]-eye_offset//2, center[1]-eye_offset//2), 2)
+        pygame.draw.circle(screen, PRETO, (center[0]+eye_offset//2, center[1]-eye_offset//2), 2)
+        pygame.draw.line(screen, PRETO, (center[0]-eye_offset//2, center[1]+eye_offset//2),
                          (center[0]+eye_offset//2, center[1]+eye_offset//2), 2)
 
-# --- Funções ---
+# Funções
 def draw_maze():
     for y, row in enumerate(maze):
         for x, cell in enumerate(row):
             pos = (x*CELL_SIZE, y*CELL_SIZE)
             center = (pos[0]+CELL_SIZE//2, pos[1]+CELL_SIZE//2)
-            if cell == 1: pygame.draw.rect(screen, MAZE_BLUE, (*pos, CELL_SIZE, CELL_SIZE))
-            elif cell == 2: pygame.draw.circle(screen, WHITE, center, 3)
-            elif cell == 3: pygame.draw.circle(screen, ORANGE, center, 6)
-            elif cell == 4: pygame.draw.rect(screen, GHOST_DOOR_COLOR, (pos[0], pos[1]+8, CELL_SIZE, 4))
+            if cell == 1: pygame.draw.rect(screen, MAZE_AZUL, (*pos, CELL_SIZE, CELL_SIZE))
+            elif cell == 2: pygame.draw.circle(screen, BRANCO, center, 3)
+            elif cell == 3: pygame.draw.circle(screen, LARANJA, center, 6)
+            elif cell == 4: pygame.draw.rect(screen, COR_PORTA_FANTASMA, (pos[0], pos[1]+8, CELL_SIZE, 4))
 
 def check_win(): return not any(2 in row or 3 in row for row in maze)
 
@@ -212,22 +212,22 @@ def restart_game():
     player.dx, player.dy = 0, 0
     for g in ghosts:
         g.x, g.y = g.start_x, g.start_y
-        g.mode = 'scatter' if g.name == 'RED' else 'exiting'
+        g.mode = 'scatter' if g.name == 'VERMELHO' else 'exiting'
     maze[:] = [[int(c) for c in row] for row in maze_layout]
 
 def show_message(text):
-    screen.fill(BLACK)
-    message_surf = font.render(text, True, YELLOW)
+    screen.fill(PRETO)
+    message_surf = font.render(text, True, AMARELO)
     screen.blit(message_surf, message_surf.get_rect(center=(WIDTH/2, HEIGHT/2)))
     pygame.display.flip()
     pygame.time.wait(3000)
 
-# --- Instâncias ---
+# Instâncias
 player = Player(13, 22)
 ghosts = [
-    Ghost(13, 11, RED, 'RED'),
-    Ghost(13, 14, PINK, 'PINK'),
-    Ghost(11, 14, CYAN, 'CYAN')
+    Ghost(13, 11, VERMELHO, 'VERMELHO'),
+    Ghost(13, 14, ROSA, 'ROSA'),
+    Ghost(11, 14, CIANO, 'CIANO')
 ]
 
 game_mode = 'scatter'
@@ -236,7 +236,7 @@ SCATTER_TIME, CHASE_TIME = 420, 1200
 move_timer = 0
 running, game_over, win = True, False, False
 
-# --- Loop Principal ---
+# Loop Principal
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: running = False
@@ -262,13 +262,13 @@ while running:
 
         if check_win(): win = True
 
-        screen.fill(BLACK)
+        screen.fill(PRETO)
         draw_maze()
         player.draw()
         for ghost in ghosts: ghost.draw()
 
-        score_text = font.render(f"Score: {player.score}", True, WHITE)
-        lives_text = font.render(f"Vidas: {player.lives}", True, WHITE)
+        score_text = font.render(f"Score: {player.score}", True, BRANCO)
+        lives_text = font.render(f"Vidas: {player.lives}", True, BRANCO)
         screen.blit(score_text, (10, HEIGHT-30))
         screen.blit(lives_text, (WIDTH-120, HEIGHT-30))
 
