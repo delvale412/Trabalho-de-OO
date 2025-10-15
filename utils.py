@@ -1,4 +1,3 @@
-# Salve este arquivo como: utils.py
 import os
 from config import SCORES_FILE
 
