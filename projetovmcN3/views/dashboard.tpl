@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard - BMVC N3</title>
+    <title>Dashboard - BMVC IV</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <script src="/static/js/script.js"></script>
+    
+    <script>
+        function connect() {
+            var ws = new WebSocket("ws://" + window.location.host + "/websocket");
+            ws.onmessage = function(evt) {
+                if (evt.data === "atualizar") {
+                    window.location.reload(); 
+                }
+            };
+            ws.onclose = function() { setTimeout(connect, 5000); };
+        }
+        window.onload = connect;
+
+        function confirmarDelecao() {
+            return confirm("Tem certeza que deseja excluir este item?");
+        }
+    </script>
 </head>
 <body>
     <header>
-        <h1>Gestão de Hardware (Nível 3)</h1>
-        <div class="user-info">
-            Usuário: <b>{{user}}</b> | <a href="/logout" class="btn-logout">Sair</a>
-        </div>
+        <h1>Gestão de Hardware</h1>
+        <div class="user-info">Usuário: <b>{{user}}</b> | <a href="/logout">Sair</a></div>
     </header>
 
     <main>
-        <div class="top-bar">
-            <h3>Itens Cadastrados</h3>
-            <a href="/novo" class="btn-novo">+ Novo Hardware</a>
-        </div>
+        <h3>Itens em Estoque</h3>
+        <a href="/novo" class="btn-novo">+ Novo Item</a>
         
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Componente</th>
-                    <th>Tipo</th>
-                    <th>Estoque</th>
-                    <th>Gerenciar</th>
+                    <th>ID</th><th>Nome</th><th>Tipo</th><th>Qtd</th><th>Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,7 +43,7 @@
                     <td>{{item.id}}</td>
                     <td>{{item.nome}}</td>
                     <td>{{item.tipo}}</td>
-                    <td>{{item.quantidade}} un.</td>
+                    <td style="font-weight:bold;">{{item.quantidade}}</td>
                     <td>
                         <a href="/editar/{{item.id}}" class="btn-edit">Editar</a>
                         <a href="/deletar/{{item.id}}" class="btn-delete" onclick="return confirmarDelecao()">Excluir</a>
@@ -46,4 +54,4 @@
         </table>
     </main>
 </body>
-</html>print("Usuário Operador Criado!")
+</html>

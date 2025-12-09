@@ -1,1 +1,4 @@
 bottle
+gevent
+gevent-websocket
+bottle-websocket
