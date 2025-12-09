@@ -1,0 +1,53 @@
+# Módulo com todas as constantes e configurações do jogo.
+
+# Configurações Gerais
+CELL_SIZE = 20
+ROWS, COLS = 31, 28
+HUD_HEIGHT = 60
+WIDTH, HEIGHT = COLS * CELL_SIZE, ROWS * CELL_SIZE + HUD_HEIGHT
+DATABASE_FILE = "scores.db"
+FPS = 30
+INITIAL_LIVES = 3
+
+# Ajustes de Gameplay
+SUPER_MODE_DURATION = 450
+PLAYER_MOVE_DELAY = 4
+GHOST_MOVE_DELAY = 6
+
+# Cores (RGB)
+COLOR_BLACK = (0, 0, 0)
+COLOR_WHITE = (255, 255, 255)
+COLOR_YELLOW = (255, 255, 0)
+COLOR_RED = (255, 0, 0)
+COLOR_BLUE = (0, 0, 255)
+COLOR_WALL = (0, 0, 180)
+COLOR_SPECIAL_DOT = (200, 0, 255)
+COLOR_SPECIAL_DOT_BLINK = (120, 0, 120)
+COLOR_GHOST_HOUSE = (80, 80, 80)
+COLOR_VULNERABLE = (0, 0, 255)
+COLOR_VULNERABLE_GHOST_BLINK = (200, 200, 255)
+COLOR_EATEN_GHOST = (40, 40, 40)
+COLOR_BLOOD = (150, 0, 0)
+
+# Cores do Jason (Visual)
+COLOR_JASON_MASK = (220, 220, 220)
+COLOR_JASON_DETAILS = (100, 100, 100)
+COLOR_JASON_MARKS = (180, 0, 0)
+
+# Cores da Arma: FACÃO (Machete)
+COLOR_MACHETE_HANDLE = (90, 50, 20)    # Madeira escura/velha
+COLOR_MACHETE_BLADE = (140, 145, 150)  # Aço
+COLOR_MACHETE_EDGE = (200, 200, 210)   # O fio da lâmina (mais claro)
+COLOR_MACHETE_RUST = (100, 60, 50)     # Detalhe de ferrugem/sangue seco
+COLOR_SWING_TRAIL = (200, 200, 200, 50) # Rastro transparente
+
+# Mantendo compatibilidade com código antigo de cores (segurança)
+COLOR_SCYTHE_HANDLE = COLOR_MACHETE_HANDLE
+COLOR_SCYTHE_BLADE = COLOR_MACHETE_BLADE
+COLOR_SCYTHE_SHINE = COLOR_MACHETE_EDGE
+
+# Cores dos Fantasmas
+COLOR_BLINKY = (255, 0, 0)
+COLOR_PINKY = (255, 184, 222)
+COLOR_INKY = (0, 255, 255)
+COLOR_CLYDE = (255, 165, 0)
