@@ -1,7 +1,3 @@
-# Salve este arquivo como: test_models.py
-# Este script serve como um "banco de testes" para verificar
-# a instanciação e as funcionalidades das classes do modelo.
-
 from entities import Player, Ghost
 from config import COLOR_BLINKY, SUPER_MODE_DURATION
 

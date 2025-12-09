@@ -1,4 +1,3 @@
-# Salve este arquivo como: game.py
 import pygame
 from config import *
 from utils import salvar_placar

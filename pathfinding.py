@@ -1,4 +1,3 @@
-# Salve este arquivo como: pathfinding.py
 import collections
 
 def bfs_next_step(start, target, maze):

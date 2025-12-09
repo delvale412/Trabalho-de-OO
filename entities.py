@@ -1,4 +1,3 @@
-# Salve este arquivo como: entities.py
 import pygame
 import math
 import random
@@ -7,7 +6,7 @@ from config import *
 from pathfinding import bfs_next_step, find_nearest_walkable_global
 
 class GameObject:
-    """Superclasse para todos os objetos móveis (HERANÇA)."""
+    
     def __init__(self, x, y):
         self.x, self.y = x, y
         self.anim_phase = random.uniform(0, 2 * math.pi)
@@ -94,6 +93,8 @@ class Player(GameObject):
     def draw(self, screen, frame):
         """Método draw (POLIMORFISMO)."""
         x_pix, y_pix = self.get_pixel_pos()
+        
+        # Desenha rastro de sangue no chão
         for drop in self.blood_trail:
             alpha = max(0, 255 - drop['age'] * 5)
             radius = max(1, 5 - drop['age'] // 8)
@@ -101,6 +102,7 @@ class Player(GameObject):
                 s = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
                 pygame.draw.circle(s, (*COLOR_BLOOD, alpha), (radius, radius), radius)
                 screen.blit(s, (int(drop['pos'][0] - radius), int(drop['pos'][1] - radius)))
+        
         if self.is_dying:
             self._draw_death_effect(screen, x_pix, y_pix)
         elif self.super_timer > 0:
@@ -126,35 +128,84 @@ class Player(GameObject):
         pygame.draw.polygon(screen, COLOR_BLACK, [(x_pix, y_pix), p1, p2])
 
     def _draw_jason_mode(self, screen, x_pix, y_pix, frame):
+        
         pygame.draw.circle(screen, COLOR_YELLOW, (x_pix, y_pix), CELL_SIZE // 2)
         mask_rect = (x_pix - 9, y_pix - 9, 18, 18)
         pygame.draw.ellipse(screen, COLOR_JASON_MASK, mask_rect)
-        pygame.draw.ellipse(screen, (50, 50, 50), mask_rect, 1)
-        pygame.draw.ellipse(screen, COLOR_BLACK, (x_pix - 6, y_pix - 5, 4, 6))
-        pygame.draw.ellipse(screen, COLOR_BLACK, (x_pix + 2, y_pix - 5, 4, 6))
+        pygame.draw.ellipse(screen, (50, 50, 50), mask_rect, 1) # Contorno
+        
+        pygame.draw.ellipse(screen, COLOR_BLACK, (x_pix - 6, y_pix - 5, 4, 6)) # Olho esq
+        pygame.draw.ellipse(screen, COLOR_BLACK, (x_pix + 2, y_pix - 5, 4, 6)) # Olho dir
+        
+        # Marcas da máscara (Triângulos vermelhos)
         pygame.draw.polygon(screen, COLOR_JASON_MARKS, [(x_pix, y_pix - 7), (x_pix - 2, y_pix - 3), (x_pix + 2, y_pix - 3)])
         pygame.draw.line(screen, COLOR_JASON_MARKS, (x_pix - 7, y_pix + 1), (x_pix - 3, y_pix + 5), 2)
         pygame.draw.line(screen, COLOR_JASON_MARKS, (x_pix + 7, y_pix + 1), (x_pix + 3, y_pix + 5), 2)
-        angle_swing = math.sin(frame * 0.2) * 20
-        weapon_angle_rad = math.radians(135 + angle_swing)
-        handle_start = (x_pix + 6, y_pix - 6)
-        handle_end = (handle_start[0] + 25 * math.cos(weapon_angle_rad), handle_start[1] - 25 * math.sin(weapon_angle_rad))
-        pygame.draw.line(screen, COLOR_MACHETE_HANDLE, handle_start, handle_end, 5)
-        blade_model = [(0, -3), (20, -6), (28, -2), (25, 5), (10, 3)]
+
+        weapon_angle_deg = 135  
+        weapon_angle_rad = math.radians(weapon_angle_deg)
+
+        # Ponto da mão
+        handle_start = (x_pix + 6, y_pix - 2)
+        
+        # Dimensões do cabo
+        handle_len = 12
+        handle_end = (
+            handle_start[0] + handle_len * math.cos(weapon_angle_rad),
+            handle_start[1] - handle_len * math.sin(weapon_angle_rad)
+        )
+
+        # B. Cabo do Facão
+        c_handle = COLOR_MACHETE_HANDLE if 'COLOR_MACHETE_HANDLE' in globals() else (100, 60, 30)
+        c_blade = COLOR_MACHETE_BLADE if 'COLOR_MACHETE_BLADE' in globals() else (150, 150, 150)
+        c_edge = COLOR_MACHETE_EDGE if 'COLOR_MACHETE_EDGE' in globals() else (200, 200, 200)
+
+        pygame.draw.line(screen, c_handle, handle_start, handle_end, 5) 
+
+        blade_model = [
+            (0, -3),    # Base
+            (0, 3),     # Base
+            (20, 4),    # Meiodo fio
+            (28, 2),    # Ponta inferior
+            (30, -5),   # Ponta superior
+            (25, -3),   # Clip point
+            (10, -3)    # Costas retas
+        ]
+
         transformed_blade = []
-        for mx, my in blade_model:
-            rx = mx * math.cos(weapon_angle_rad) - my * math.sin(weapon_angle_rad)
-            ry = mx * math.sin(weapon_angle_rad) + my * math.cos(weapon_angle_rad)
-            transformed_blade.append((handle_end[0] + rx, handle_end[1] + ry))
-        pygame.draw.polygon(screen, COLOR_MACHETE_BLADE, transformed_blade)
-        pygame.draw.polygon(screen, COLOR_JASON_DETAILS, transformed_blade, 1)
-        if len(transformed_blade) >= 3:
-            pygame.draw.line(screen, COLOR_MACHETE_SHINE, transformed_blade[1], transformed_blade[2], 2)
-        pygame.draw.circle(screen, COLOR_YELLOW, handle_start, 5)
-        pygame.draw.circle(screen, COLOR_BLACK, handle_start, 5, 1)
+        tip_pos = (0,0)
+        
+        sin_a = math.sin(weapon_angle_rad)
+        cos_a = math.cos(weapon_angle_rad)
+
+        for i, (mx, my) in enumerate(blade_model):
+            # Rotaciona
+            rx = mx * cos_a - my * sin_a
+            ry = mx * sin_a + my * cos_a
+            # Translada
+            pos = (handle_end[0] + rx, handle_end[1] + ry)
+            transformed_blade.append(pos)
+            if i == 4: tip_pos = pos
+
+        # Desenha lâmina
+        pygame.draw.polygon(screen, c_blade, transformed_blade)
+        pygame.draw.polygon(screen, (50,50,50), transformed_blade, 1) # Contorno
+        
+        # Desenha o fio
+        if len(transformed_blade) > 3:
+             pygame.draw.line(screen, c_edge, transformed_blade[1], transformed_blade[2], 2)
+             pygame.draw.line(screen, c_edge, transformed_blade[2], transformed_blade[3], 2)
+
+        if frame % 20 < 10: 
+            pygame.draw.circle(screen, COLOR_BLOOD, (int(tip_pos[0]), int(tip_pos[1] + 2)), 2)
+        else: 
+            drop_offset = (frame % 10) * 1.5
+            pygame.draw.circle(screen, COLOR_BLOOD, (int(tip_pos[0]), int(tip_pos[1] + 2 + drop_offset)), 2)
+
+        pygame.draw.circle(screen, COLOR_YELLOW, handle_start, 4)
 
 class Ghost(GameObject):
-    """Classe que representa um fantasma."""
+
     def __init__(self, x, y, color, gtype):
         super().__init__(x, y)
         self.spawn_x, self.spawn_y = x, y
@@ -162,9 +213,9 @@ class Ghost(GameObject):
         self.type = gtype
         self.state = "house"
         self.vul_timer = 0
+        self.font_rip = pygame.font.SysFont("Arial", 9, bold=True)
 
     def update(self, maze, player, ghosts, blinky_ref):
-        """Update do fantasma (ASSOCIAÇÃO com player)."""
         if self.state == "house": return
         if self.state == "vulnerable":
             self.vul_timer -= 1
@@ -214,16 +265,30 @@ class Ghost(GameObject):
     def draw(self, screen, frame):
         offset = int(math.sin((frame + self.anim_phase) * 0.25) * 2)
         cx, cy = self.get_pixel_pos(); cy += offset
+        
+        if self.state == "eaten":
+        
+            tomb_color = (120, 120, 120)
+            rect_w, rect_h = 14, 14
+            
+            pygame.draw.circle(screen, tomb_color, (cx, cy - 4), 7)
+            # Base retangular
+            pygame.draw.rect(screen, tomb_color, (cx - 7, cy - 4, 14, 12))
+            
+            rip_surf = self.font_rip.render("RIP", True, (0, 0, 0)) # Texto preto
+            rip_rect = rip_surf.get_rect(center=(cx, cy + 1))
+            screen.blit(rip_surf, rip_rect)
+            
+            return
+
         if self.state == "vulnerable":
             color = COLOR_VULNERABLE if (self.vul_timer > 90 or (frame // 5) % 2 == 0) else COLOR_VULNERABLE_GHOST_BLINK
-        elif self.state == "eaten":
-            color = COLOR_EATEN_GHOST
         else:
             color = self.color
+        
         pygame.draw.circle(screen, color, (cx, cy - 4), CELL_SIZE // 2 - 3)
         pygame.draw.rect(screen, color, (cx - CELL_SIZE // 2 + 3, cy - 4, CELL_SIZE - 6, CELL_SIZE // 2))
-        if self.state != "eaten":
-            for i in [-1, 1]:
-                pygame.draw.circle(screen, COLOR_WHITE, (cx + i * 4, cy - 6), 4)
-                pygame.draw.circle(screen, COLOR_BLACK, (cx + i * 4, cy - 6), 2)
-
+        
+        for i in [-1, 1]:
+            pygame.draw.circle(screen, COLOR_WHITE, (cx + i * 4, cy - 6), 4)
+            pygame.draw.circle(screen, COLOR_BLACK, (cx + i * 4, cy - 6), 2)

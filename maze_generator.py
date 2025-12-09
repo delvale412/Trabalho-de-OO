@@ -1,4 +1,3 @@
-# Salve este arquivo como: maze_generator.py
 import random
 from config import ROWS, COLS
 

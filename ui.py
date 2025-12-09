@@ -1,4 +1,3 @@
-# Salve este arquivo como: ui.py
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton,
     QLabel, QLineEdit, QMessageBox, QDialog, QTextEdit, QHBoxLayout
